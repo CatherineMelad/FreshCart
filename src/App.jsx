@@ -15,7 +15,7 @@ import { ToastContainer } from 'react-toastify';
 import CartContextProvider from "./Contexts/CartContext";
 import Address from "./Pages/Address/Address";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import AllOrders from "./Pages/allOrders/allOrders";
+import AllOrders from "./Pages/AllOrders/AllOrders";
 
 
 const queryClient = new QueryClient()
