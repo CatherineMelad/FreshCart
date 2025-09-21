@@ -21,14 +21,13 @@ export default function AuthContextProvider({ children }) {
     setIsLoading(true);
     axios
       .get("https://ecommerce.routemisr.com/api/v1/auth/verifyToken", {
-        headers: { token }, // ✅ fixed header
+        headers: { token }, 
       })
       .then((res) => {
         setIsLoggedIn(true);
         setUserId(res.data.decoded.id);
       })
       .catch(() => {
-        // remove token only if backend rejects it
         localStorage.removeItem("token");
         setIsLoggedIn(false);
       })
