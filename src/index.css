@@ -1,0 +1,25 @@
+@import "tailwindcss";
+@import "flowbite/src/themes/default";
+@plugin "flowbite/plugin";
+@source "../node_modules/flowbite";
+
+
+.contianer {
+    @apply mt-30;
+}
+.btn{
+    @apply bg-[#0dac0c]
+}
+.disabled-btn{
+    @apply bg-[#79ca70]
+}
+
+.slick-dots li{
+    width: auto !important;
+    height: 0 !important;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  display: none !important;
+}
