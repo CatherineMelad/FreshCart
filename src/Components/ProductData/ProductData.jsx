@@ -1,6 +1,7 @@
 import Slider from "react-slick";
 import AddToCartBtn from "../AddToCartBtn/AddToCartBtn";
 import Stars from "../Stars/Stars";
+import WishlistButton from "../WishlistButton/WishlistButton";
 
 export default function ProductData({ data }) {
   const settings = {
@@ -54,8 +55,11 @@ export default function ProductData({ data }) {
           </div>
         </div>
 
-        <div className="mt-6 sm:mt-8 max-w-xs">
-          <AddToCartBtn id={data._id} className="" />
+        <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-3">
+          <div className="w-full max-w-xs">
+            <AddToCartBtn id={data._id} className="" />
+          </div>
+          <WishlistButton product={data} variant="full" />
         </div>
         <hr className="my-6 md:my-8 border-gray-200" />
       </div>

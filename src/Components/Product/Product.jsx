@@ -1,11 +1,16 @@
 import { Link } from "react-router-dom";
 import AddToCartBtn from "../AddToCartBtn/AddToCartBtn";
 import Stars from "../Stars/Stars";
+import WishlistButton from "../WishlistButton/WishlistButton";
 
 export default function Product({ product }) {
   return (
     <div className="w-full">
-      <div className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+      <div className="relative bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+        <WishlistButton
+          product={product}
+          className="absolute right-3 top-3 z-10"
+        />
         <Link to={"/product/" + product._id}>
           <img
             src={product.imageCover}

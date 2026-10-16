@@ -16,6 +16,7 @@ import ProtectedRoute from "./Auth/ProtectedRoute";
 import GuestRoute from "./Auth/GuestRoute";
 import AuthContextProvider from "./Contexts/AuthContext";
 import Products from "./Pages/Products/Products";
+import Wishlist from "./Pages/Wishlist/Wishlist";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
       { path: "register", element: guest(<Register />) },
       { path: "cart", element: protectedPage(<Cart />) },
       { path: "address/:cartId", element: protectedPage(<Address />) },
+      { path: "wishlist", element: protectedPage(<Wishlist />) },
       { path: "allorders", element: protectedPage(<AllOrders />) },
       { path: "categories", element: protectedPage(<Categories />) },
       { path: "brands", element: protectedPage(<Brands />) },

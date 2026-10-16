@@ -2,12 +2,14 @@ import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../Contexts/AuthContext";
 import { useCart } from "../../hooks/useCart";
+import { useWishlist } from "../../hooks/useWishlist";
 
 const links = [
   { to: "/", label: "Home" },
   { to: "/products", label: "Products" },
   { to: "/categories", label: "Categories" },
   { to: "/brands", label: "Brands" },
+  { to: "/wishlist", label: "Wishlist" },
   { to: "/cart", label: "Cart" },
   { to: "/allorders", label: "My Orders" },
 ];
@@ -20,7 +22,11 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { isLoggedIn, logout } = useAuth();
   const { data: cart } = useCart({ enabled: isLoggedIn });
-  const cartCount = cart?.numOfCartItems ?? 0;
+  const { data: wishlist } = useWishlist();
+  const badges = {
+    "/cart": cart?.numOfCartItems ?? 0,
+    "/wishlist": wishlist?.length ?? 0,
+  };
 
   function handleLogout() {
     setMenuOpen(false);
@@ -93,9 +99,9 @@ export default function Navbar() {
                     }
                   >
                     {label}
-                    {to === "/cart" && cartCount > 0 && (
+                    {badges[to] > 0 && (
                       <span className="bg-[#0dac0c] text-white text-xs rounded-full min-w-5 h-5 px-1 inline-flex items-center justify-center">
-                        {cartCount}
+                        {badges[to]}
                       </span>
                     )}
                   </NavLink>
