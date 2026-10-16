@@ -1,229 +1,98 @@
-import React, { useContext, useState } from "react";
+import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { authContext } from "../../Contexts/AuthContext";
+import { Link, useNavigate } from "react-router-dom";
+import { api, getErrorMessage } from "../../api/client";
+import { useAuth } from "../../Contexts/AuthContext";
+import FormField from "../../Components/FormField/FormField";
+import ErrorMessage from "../../Components/ErrorMessage/ErrorMessage";
+import { emailRule, passwordRule, phoneRule } from "../../utils/validation";
 
 export default function Register() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [apiError, setApiError] = useState('');
+  const [apiError, setApiError] = useState("");
   const navigate = useNavigate();
-  const {setIsLoggedIn} = useContext(authContext)
+  const { login } = useAuth();
 
-  const initialValues = {
-    name: "",
-    email: "",
-    password: "",
-    rePassword: "",
-    phone: "+20",
-  };
-
-
-
-  const onSubmit = async () => {
-    setIsLoading(true);
-    setApiError("");
-
-    try {
-      let { data } = await axios.post(
-        "https://ecommerce.routemisr.com/api/v1/auth/signup",
-        values
-      );
-      setIsLoggedIn(true)
-      navigate("/");
-    } catch (error) {
-      const errorMes = error.response.data.message || 'Something went wrong. Please try again.';
-      setApiError(errorMes);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const validationSchema = Yup.object({
-    name: Yup.string()
-      .required("Name is required")
-      .min(4, "Name must be at least 3 characters")
-      .max(29, "Name must be less than 30 characters"),
-    email: Yup.string()
-      .required("Email is required")
-      .matches(
-        /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
-        " Please enter a valid email address"
-      ),
-    password: Yup.string()
-      .required("Password is required")
-      .matches(
-        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/,
-        "Password must be at least 8 characters long and contain at least one uppercase letter and one number"
-      ),
-    rePassword: Yup.string()
-      .required("Please confirm your password")
-      .oneOf([Yup.ref("password")], "Passwords do not match"),
-    phone: Yup.string()
-      .required("Phone number is required.")
-      .matches(
-        /^(\+|00)[1-9][0-9 \-\(\)\.]{7,32}$/,
-        " Please enter a valid egyption phone number"
-      ),
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      email: "",
+      password: "",
+      rePassword: "",
+      phone: "+20",
+    },
+    validationSchema: Yup.object({
+      name: Yup.string()
+        .required("Name is required")
+        .min(3, "Name must be at least 3 characters")
+        .max(29, "Name must be less than 30 characters"),
+      email: emailRule,
+      password: passwordRule,
+      rePassword: Yup.string()
+        .required("Please confirm your password")
+        .oneOf([Yup.ref("password")], "Passwords do not match"),
+      phone: phoneRule,
+    }),
+    onSubmit: async (values) => {
+      setApiError("");
+      try {
+        const { data } = await api.post("/auth/signup", values);
+        login(data.token);
+        navigate("/", { replace: true });
+      } catch (error) {
+        setApiError(getErrorMessage(error));
+      }
+    },
   });
 
-  const { handleSubmit, handleChange, values, errors, handleBlur, touched } =
-    useFormik({
-      initialValues,
-      onSubmit,
-      validationSchema,
-    });
-
   return (
-    <>
-      <form
-        className="max-w-xs sm:max-w-xl md:max-w-2xl lg:max-w-3xl mx-auto"
-        onSubmit={handleSubmit}
+    <form
+      className="max-w-xs sm:max-w-xl md:max-w-2xl lg:max-w-3xl mx-auto"
+      onSubmit={formik.handleSubmit}
+      noValidate
+    >
+      {apiError && <ErrorMessage message={apiError} />}
+      <p className="text-3xl font-thin mb-5">Register Now :</p>
+
+      <FormField id="name" label="Your Name" formik={formik} />
+      <FormField
+        id="email"
+        label="Your Email"
+        type="email"
+        formik={formik}
+        placeholder="name@example.com"
+      />
+      <FormField
+        id="password"
+        label="Your Password"
+        type="password"
+        formik={formik}
+      />
+      <FormField
+        id="rePassword"
+        label="Repeat Password"
+        type="password"
+        formik={formik}
+      />
+      <FormField id="phone" label="Your Phone" type="tel" formik={formik} />
+
+      <button
+        disabled={formik.isSubmitting}
+        type="submit"
+        className="text-white btn focus:ring-4 focus:outline-none focus:ring-[#79ca70] rounded-lg text-lg px-4 py-2 text-center disabled:opacity-60"
       >
-        {apiError && (
-          <div
-            class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50"
-            role="alert"
-          >
-            {apiError}
-          </div>
+        {formik.isSubmitting ? (
+          <i className="fa-solid fa-spinner fa-spin-pulse"></i>
+        ) : (
+          "Register"
         )}
-
-        <p className="text-3xl font-thin mb-5">Register Now :</p>
-        <div className="mb-5">
-          <label
-            htmlFor="name"
-            className="block mb-2 text-sm font-thin text-black "
-          >
-            Your Name
-          </label>
-          <input
-            onBlur={handleBlur}
-            onChange={handleChange}
-            value={values.name}
-            name="name"
-            type="text"
-            id="name"
-            className={`shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#79ca70] focus:border-[#79ca70] block w-full p-2.5 ${
-              touched.name && errors.name
-                ? "focus:ring-red-500 focus:border-red-500 ring-red-500 border-red-500"
-                : ""
-            }`}
-          />
-          {touched.name && errors.name && (
-            <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-          )}
-        </div>
-        <div className="mb-5">
-          <label
-            htmlFor="email"
-            className="block mb-2 text-sm font-thin text-black "
-          >
-            Your Email
-          </label>
-          <input
-            onBlur={handleBlur}
-            onChange={handleChange}
-            value={values.email}
-            name="email"
-            type="email"
-            id="email"
-            className={`shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#79ca70] focus:border-[#79ca70] block w-full p-2.5 ${
-              touched.email && errors.email
-                ? "focus:ring-red-500 focus:border-red-500 ring-red-500 border-red-500"
-                : ""
-            }`}
-            placeholder="name@flowbite.com"
-          />
-          {touched.email && errors.email && (
-            <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-          )}
-        </div>
-        <div className="mb-5">
-          <label
-            htmlFor="password"
-            className="block mb-2 text-sm font-thin text-black"
-          >
-            Your Password
-          </label>
-          <input
-            onBlur={handleBlur}
-            onChange={handleChange}
-            value={values.password}
-            name="password"
-            type="password"
-            id="password"
-            className={`shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#79ca70] focus:border-[#79ca70] block w-full p-2.5 ${
-              touched.password && errors.password
-                ? "focus:ring-red-500 focus:border-red-500 ring-red-500 border-red-500"
-                : ""
-            }`}
-          />
-          {touched.password && errors.password && (
-            <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-          )}
-        </div>
-        <div className="mb-5">
-          <label
-            htmlFor="repeat-password"
-            className="block mb-2 text-sm font-thin text-black "
-          >
-            Repeat Password
-          </label>
-          <input
-            onBlur={handleBlur}
-            onChange={handleChange}
-            value={values.rePassword}
-            name="rePassword"
-            type="password"
-            id="repeat-password"
-            className={`shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#79ca70] focus:border-[#79ca70] block w-full p-2.5 ${
-              touched.rePassword && errors.rePassword
-                ? "focus:ring-red-500 focus:border-red-500 ring-red-500 border-red-500"
-                : ""
-            }`}
-          />
-          {touched.rePassword && errors.rePassword && (
-            <p className="text-red-500 text-xs mt-1">{errors.rePassword}</p>
-          )}
-        </div>
-        <div className="mb-5">
-          <label
-            htmlFor="phone"
-            className="block mb-2 text-sm font-thin text-black "
-          >
-            Your Phone
-          </label>
-          <input
-            onBlur={handleBlur}
-            onChange={handleChange}
-            value={values.phone}
-            name="phone"
-            type="tel"
-            id="phone"
-            className={`shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#79ca70] focus:border-[#79ca70] block w-full p-2.5 ${
-              touched.phone && errors.phone
-                ? "focus:ring-red-500 focus:border-red-500 ring-red-500 border-red-500"
-                : ""
-            }`}
-          />
-          {touched.phone && errors.phone && (
-            <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
-          )}
-        </div>
-
-        <div className="">
-          <button
-            disabled={isLoading}
-            type="submit"
-            className="text-white btn focus:ring-4 focus:outline-none focus:ring-[#79ca70] font-thin rounded-lg text-lg px-4 py-2 text-center"
-          >
-            {isLoading ? <i className="fa-solid fa-spinner fa-spin-pulse"></i> : 'Register'}
-            
-          </button>
-        </div>
-      </form>
-    </>
+      </button>
+      <p className="mt-4 text-sm text-gray-500">
+        Already have an account?{" "}
+        <Link to="/login" className="text-[#0dac0c] hover:underline">
+          Log in
+        </Link>
+      </p>
+    </form>
   );
 }

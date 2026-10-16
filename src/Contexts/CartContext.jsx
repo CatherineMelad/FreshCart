@@ -7,20 +7,19 @@ export default function CartContextProvider({ children }) {
   const [cartId, setCartId] = useState(null);
   const [cartData, setCartData] = useState(null);
   const [numOfCartItems, setNumOfCartItems] = useState(0);
-  
 
   async function getLoggedUserCart() {
-    setiIsLoading(true)
+    setiIsLoading(true);
     const { data } = await axios.get(
       "https://ecommerce.routemisr.com/api/v1/cart",
       {
         headers: { token: localStorage.getItem("token") },
-      }
+      },
     );
     setCartId(data.cartId);
     setCartData(data.data);
     setNumOfCartItems(data.numOfCartItems);
-    setiIsLoading(false)
+    setiIsLoading(false);
   }
 
   async function removeCartProduct(productId) {
@@ -28,7 +27,7 @@ export default function CartContextProvider({ children }) {
       `https://ecommerce.routemisr.com/api/v1/cart/${productId}`,
       {
         headers: { token: localStorage.getItem("token") },
-      }
+      },
     );
     setCartData(data.data);
     setNumOfCartItems(data.numOfCartItems);
@@ -39,15 +38,11 @@ export default function CartContextProvider({ children }) {
       `https://ecommerce.routemisr.com/api/v1/cart`,
       {
         headers: { token: localStorage.getItem("token") },
-      }
+      },
     );
     setCartData(null);
     setNumOfCartItems(0);
   }
-
-
-
-
 
   return (
     <cartContext.Provider
@@ -59,7 +54,7 @@ export default function CartContextProvider({ children }) {
         cartData,
         setCartData,
         numOfCartItems,
-        isLoading
+        isLoading,
       }}
     >
       {children}

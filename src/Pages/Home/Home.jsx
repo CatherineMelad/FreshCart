@@ -1,37 +1,29 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../../api/client";
 import Product from "../../Components/Product/Product";
 import LoadingScreen from "../../Components/LoadingScreen/LoadingScreen";
-import { useQuery } from "@tanstack/react-query";
+import ErrorMessage from "../../Components/ErrorMessage/ErrorMessage";
 
 export default function Home() {
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["products"],
+    queryFn: () => api.get("/products").then((res) => res.data.data),
+  });
 
-
-  function getAllProducts(){
-    return axios.get(
-      "https://ecommerce.routemisr.com/api/v1/products"
+  if (isLoading) return <LoadingScreen />;
+  if (isError)
+    return (
+      <ErrorMessage
+        message="We couldn't load the products."
+        onRetry={refetch}
+      />
     );
-  }
-
-  const {data , isLoading} = useQuery({
-    queryKey:['products'],
-    queryFn:getAllProducts,
-    select:(data)=>data.data.data
-  })
-
-  
-
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
 
   return (
-    <>
-      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5 max-w-screen-xl mx-auto">
-        {data?.map((product, index) => {
-          return <Product key={index} product={product} />;
-        })}
-      </div>
-    </>
+    <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5 max-w-screen-xl mx-auto px-4">
+      {data.map((product) => (
+        <Product key={product._id} product={product} />
+      ))}
+    </div>
   );
 }

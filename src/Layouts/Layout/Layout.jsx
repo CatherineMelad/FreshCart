@@ -1,25 +1,20 @@
-import React, { useContext } from "react";
-import Navbar from "../../Components/Navbar/Navbar";
 import { Outlet } from "react-router-dom";
+import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Footer/Footer";
-import { authContext } from "../../Contexts/AuthContext";
 import LoadingScreen from "../../Components/LoadingScreen/LoadingScreen";
+import { useAuth } from "../../Contexts/AuthContext";
 
 export default function Layout() {
-  const { isLoading } = useContext(authContext);
+  const { isLoading } = useAuth();
+
+  if (isLoading) return <LoadingScreen />;
+
   return (
     <>
-      {isLoading ? (
-        <LoadingScreen />
-      ) : (
-        <>
-          <Navbar />
-          <div className="contianer">
-            <Outlet />
-          </div>
-        </>
-      )}
-
+      <Navbar />
+      <main className="page-container">
+        <Outlet />
+      </main>
       <Footer />
     </>
   );

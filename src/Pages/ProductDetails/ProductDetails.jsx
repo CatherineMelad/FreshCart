@@ -1,61 +1,66 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import Slider from "react-slick";
-import RelatedProsucts from "../../Components/RelatedProsucts/RelatedProsucts";
-import Product from "../../Components/Product/Product";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../../api/client";
 import ProductData from "../../Components/ProductData/ProductData";
+import RelatedProducts from "../../Components/RelatedProducts/RelatedProducts";
+import LoadingScreen from "../../Components/LoadingScreen/LoadingScreen";
+import ErrorMessage from "../../Components/ErrorMessage/ErrorMessage";
+
+const fetchProducts = (params) =>
+  api.get("/products", { params }).then((res) => res.data.data);
 
 export default function ProductDetails() {
-  let { id } = useParams();
-  const [productData, setProductData] = useState(null);
-  const [relatedProducts, setRelatedProducts] = useState([])
-  const [brandProducts, setBrandProducts] = useState([])
-  const [brandName, setBrandName] = useState(null)
+  const { id } = useParams();
+
+  const {
+    data: product,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["product", id],
+    queryFn: () => api.get(`/products/${id}`).then((res) => res.data.data),
+  });
+
+  const categoryId = product?.category?._id;
+  const brandId = product?.brand?._id;
+
+  const { data: related = [] } = useQuery({
+    queryKey: ["products", { category: categoryId }],
+    queryFn: () => fetchProducts({ "category[in]": categoryId }),
+    enabled: Boolean(categoryId),
+  });
+
+  const { data: fromBrand = [] } = useQuery({
+    queryKey: ["products", { brand: brandId }],
+    queryFn: () => fetchProducts({ brand: brandId }),
+    enabled: Boolean(brandId),
+  });
 
   useEffect(() => {
-    getProductDetails();
-  }, []);
+    window.scrollTo({ top: 0 });
+  }, [id]);
 
-  async function getProductDetails() {
-    const { data } = await axios.get(
-      "https://ecommerce.routemisr.com/api/v1/products/" + id
+  if (isLoading) return <LoadingScreen />;
+  if (isError)
+    return (
+      <ErrorMessage
+        message="We couldn't load this product."
+        onRetry={refetch}
+      />
     );
-    setProductData(data.data);
-    getRelatedProducts(data.data.category._id)
-    getBrandProducts(data.data.brand._id)
-    setBrandName(data.data.brand.name)
-  }
-
-    async function getRelatedProducts(categoryId) {
-    const { data } = await axios.get(
-      `https://ecommerce.routemisr.com/api/v1/products?category[in]=${categoryId}`
-   );
-    setRelatedProducts(data.data);
-    
-  }
-      async function getBrandProducts(brandId) {
-    const { data } = await axios.get(
-      `https://ecommerce.routemisr.com/api/v1/products?brand=${brandId}`
-   );
-    setBrandProducts(data.data);
-    
-  }
-
-
 
   return (
-    <>
-      <section className=" bg-white  antialiased">
-        <div className="max-w-screen-xl px-4 mx-auto 2xl:px-0">
-
-          <ProductData data={productData}/>
-          <RelatedProsucts relatedProducts={relatedProducts} brandProducts={brandProducts} brandName={brandName}/>
-
-        </div>
-        
-      </section>
-      
-    </>
+    <section className="bg-white antialiased">
+      <div className="max-w-screen-xl px-4 mx-auto 2xl:px-0">
+        <ProductData data={product} />
+        <RelatedProducts
+          relatedProducts={related.filter((p) => p._id !== product._id)}
+          brandProducts={fromBrand.filter((p) => p._id !== product._id)}
+          brandName={product.brand?.name}
+        />
+      </div>
+    </section>
   );
 }

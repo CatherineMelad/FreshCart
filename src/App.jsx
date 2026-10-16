@@ -1,4 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ToastContainer } from "react-toastify";
 import Layout from "./Layouts/Layout/Layout";
 import Home from "./Pages/Home/Home";
 import Login from "./Pages/Login/Login";
@@ -6,111 +8,47 @@ import Register from "./Pages/Register/Register";
 import Cart from "./Pages/Cart/Cart";
 import Categories from "./Pages/Categories/Categories";
 import Brands from "./Pages/Brands/Brands";
-import ProtectedRoute from "./Auth/ProtectedRoute";
-import ProtectedAuthRoute from "./Auth/ProtectedAuthRoute";
-import AuthContextProvider from "../src/Contexts/AuthContext";
-import NotFound from "./Pages/NotFound/NotFound";
-import ProductDetails from "./Pages/ProductDetails/ProductDetails";
-import { ToastContainer } from 'react-toastify';
-import CartContextProvider from "./Contexts/CartContext";
 import Address from "./Pages/Address/Address";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AllOrders from "./Pages/AllOrders/AllOrders";
+import ProductDetails from "./Pages/ProductDetails/ProductDetails";
+import NotFound from "./Pages/NotFound/NotFound";
+import ProtectedRoute from "./Auth/ProtectedRoute";
+import GuestRoute from "./Auth/GuestRoute";
+import AuthContextProvider from "./Contexts/AuthContext";
 
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
+});
 
-const queryClient = new QueryClient()
+const guest = (page) => <GuestRoute>{page}</GuestRoute>;
+const protectedPage = (page) => <ProtectedRoute>{page}</ProtectedRoute>;
 
+const router = createBrowserRouter([
+  {
+    path: "",
+    element: <Layout />,
+    children: [
+      { index: true, element: <Home /> },
+      { path: "login", element: guest(<Login />) },
+      { path: "register", element: guest(<Register />) },
+      { path: "cart", element: protectedPage(<Cart />) },
+      { path: "address/:cartId", element: protectedPage(<Address />) },
+      { path: "allorders", element: protectedPage(<AllOrders />) },
+      { path: "categories", element: protectedPage(<Categories />) },
+      { path: "brands", element: protectedPage(<Brands />) },
+      { path: "product/:id", element: protectedPage(<ProductDetails />) },
+      { path: "*", element: <NotFound /> },
+    ],
+  },
+]);
 
-function App() {
-  const router = createBrowserRouter([
-    {
-      path: "",
-      element: <Layout />,
-      children: [
-        { index: true, element: <Home /> },
-        {
-          path: "login",
-          element: (
-            <ProtectedAuthRoute>
-              <Login />
-            </ProtectedAuthRoute>
-          ),
-        },
-        {
-          path: "register",
-          element: (
-            <ProtectedAuthRoute>
-              <Register />
-            </ProtectedAuthRoute>
-          ),
-        },
-
-        {
-          path: "cart",
-          element: (
-            <ProtectedRoute>
-              <Cart />
-            </ProtectedRoute>
-          ),
-        },
-                {
-          path: "address/:cartId",
-          element: (
-            <ProtectedRoute>
-              <Address />
-            </ProtectedRoute>
-          ),
-        },
-                {
-          path: "allorders",
-          element: (
-            <ProtectedRoute>
-              <AllOrders />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: "categories",
-          element: (
-            <ProtectedRoute>
-              <Categories />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: "brands",
-          element: (
-            <ProtectedRoute>
-              <Brands />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: "product/:id",
-          element: (
-            <ProtectedRoute>
-              <ProductDetails/>
-            </ProtectedRoute>
-          ),
-        },
-        { path: "*", element: <NotFound /> },
-      ],
-    },
-  ]);
+export default function App() {
   return (
-    <>
     <QueryClientProvider client={queryClient}>
-    
       <AuthContextProvider>
-      <CartContextProvider>
-                <RouterProvider router={router}></RouterProvider>
-        <ToastContainer/>
-      </CartContextProvider>
-
+        <RouterProvider router={router} />
+        <ToastContainer position="top-right" autoClose={3000} theme="light" />
       </AuthContextProvider>
-      </QueryClientProvider>
-    </>
+    </QueryClientProvider>
   );
 }
-
-export default App;
