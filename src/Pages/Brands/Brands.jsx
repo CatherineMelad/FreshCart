@@ -16,5 +16,11 @@ export default function Brands() {
       <ErrorMessage message="We couldn't load the brands." onRetry={refetch} />
     );
 
-  return <ImageCardGrid title="Brands" items={data} />;
+  return (
+    <ImageCardGrid
+      title="Brands"
+      items={data}
+      getLink={(b) => `/products?brand=${b._id}`}
+    />
+  );
 }

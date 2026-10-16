@@ -15,6 +15,7 @@ import NotFound from "./Pages/NotFound/NotFound";
 import ProtectedRoute from "./Auth/ProtectedRoute";
 import GuestRoute from "./Auth/GuestRoute";
 import AuthContextProvider from "./Contexts/AuthContext";
+import Products from "./Pages/Products/Products";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
@@ -29,6 +30,7 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: <Home /> },
+      { path: "products", element: <Products /> },
       { path: "login", element: guest(<Login />) },
       { path: "register", element: guest(<Register />) },
       { path: "cart", element: protectedPage(<Cart />) },

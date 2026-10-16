@@ -33,7 +33,7 @@ export default function Cart() {
       <div className="text-center">
         <h1 className="text-2xl font-semibold">Your cart is empty</h1>
         <Link
-          to="/"
+          to="/products"
           className="inline-block mt-4 text-[#0dac0c] font-medium hover:underline"
         >
           Browse products

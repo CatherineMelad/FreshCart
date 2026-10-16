@@ -5,6 +5,7 @@ import { useCart } from "../../hooks/useCart";
 
 const links = [
   { to: "/", label: "Home" },
+  { to: "/products", label: "Products" },
   { to: "/categories", label: "Categories" },
   { to: "/brands", label: "Brands" },
   { to: "/cart", label: "Cart" },

@@ -19,5 +19,11 @@ export default function Categories() {
       />
     );
 
-  return <ImageCardGrid title="Categories" items={data} />;
+  return (
+    <ImageCardGrid
+      title="Categories"
+      items={data}
+      getLink={(c) => `/products?category=${c._id}`}
+    />
+  );
 }
